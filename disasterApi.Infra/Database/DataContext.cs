@@ -1,5 +1,4 @@
 ﻿using disasterApi.Domain.Entities;
-using disasterApi.Infra.Database.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace disasterApi.Infra.Database
@@ -17,11 +16,13 @@ namespace disasterApi.Infra.Database
         public DbSet<Alert> Alerts { get; set; }
         
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            builder.ApplyConfiguration(new RegionConfiguration());
-            builder.ApplyConfiguration(new AlertSettingConfiguration());
-            builder.ApplyConfiguration(new AlertConfiguration());
+            modelBuilder.Entity<Region>()
+                .Property(r => r.DisasterTypes)
+                .HasConversion(
+                v => string.Join(",", v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
         }
     }
 }

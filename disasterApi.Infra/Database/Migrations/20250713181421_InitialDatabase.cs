@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace disasterApi.Infra.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class initialDatabse : Migration
+    public partial class InitialDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,10 +34,10 @@ namespace disasterApi.Infra.Database.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     RegionId = table.Column<Guid>(type: "uuid", nullable: false),
-                    DisasterType = table.Column<string>(type: "text", nullable: true),
-                    RiskLevel = table.Column<string>(type: "text", nullable: true),
-                    Message = table.Column<string>(type: "text", nullable: false),
-                    AlertDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DisasterType = table.Column<string>(type: "text", nullable: false),
+                    RiskLevel = table.Column<string>(type: "text", nullable: false),
+                    AlertMessage = table.Column<string>(type: "text", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
@@ -59,9 +59,8 @@ namespace disasterApi.Infra.Database.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     RegionId = table.Column<Guid>(type: "uuid", nullable: false),
-                    DisasterType = table.Column<string>(type: "text", nullable: true),
+                    DisasterType = table.Column<string>(type: "text", nullable: false),
                     ThresholdScore = table.Column<double>(type: "double precision", nullable: false),
-                    RegionId1 = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
@@ -75,11 +74,6 @@ namespace disasterApi.Infra.Database.Migrations
                         principalTable: "Regions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AlertSettings_Regions_RegionId1",
-                        column: x => x.RegionId1,
-                        principalTable: "Regions",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -91,11 +85,6 @@ namespace disasterApi.Infra.Database.Migrations
                 name: "IX_AlertSettings_RegionId",
                 table: "AlertSettings",
                 column: "RegionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AlertSettings_RegionId1",
-                table: "AlertSettings",
-                column: "RegionId1");
         }
 
         /// <inheritdoc />

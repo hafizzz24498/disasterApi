@@ -1,63 +1,27 @@
 ﻿using disasterApi.Core.Interfaces.Infra.Database;
-using disasterApi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace disasterApi.Infra.Database.Repositories
 {
-    public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : BaseEntity
+    public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        protected readonly DataContext _context;
+        protected readonly DataContext RepositoryContext;
         public BaseRepository(DataContext context)
         {
-            this._context = context;
+            RepositoryContext = context;
         }
 
-        public async Task<TEntity> GetByIdAsync(Guid id)
-        {
-            return await _context.Set<TEntity>().FindAsync(id);
-        }
-
-        public async Task<bool> DoesExist(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await _context.Set<TEntity>().AnyAsync(predicate);
-        }
-
-        public async Task<TEntity> AddAsync(TEntity entity)
-        {
-            entity.Id = Guid.NewGuid();
-            entity.CreatedAt = DateTime.UtcNow;
-            entity.UpdatedAt = entity.CreatedAt;
-            entity.IsDeleted = false;
-
-            await _context.Set<TEntity>().AddAsync(entity);
-
-            return entity;
-        }
-
-        public TEntity Update(TEntity entity)
-        {
-            entity.UpdatedAt = DateTime.UtcNow;
-
-            return entity;
-        }
-
-        public TEntity Remove(TEntity entity)
-        {
-            entity.UpdatedAt = DateTime.UtcNow;
-            entity.IsDeleted = true;
-
-            return entity;
-        }
+        public IQueryable<T> FindAll(bool trackChanges) => !trackChanges ? RepositoryContext.Set<T>().AsNoTracking() : RepositoryContext.Set<T>();
+        public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges) =>
+            !trackChanges ? RepositoryContext.Set<T>().Where(expression).AsNoTracking() : RepositoryContext.Set<T>().Where(expression);
+        public void Create(T entity) => RepositoryContext.Set<T>().Add(entity);
+        public void Update(T entity) => RepositoryContext.Set<T>().Update(entity);
+        public void Delete(T entity) => RepositoryContext.Set<T>().Remove(entity);
 
         public async Task SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();
+            await RepositoryContext.SaveChangesAsync();
         }
     }
 }

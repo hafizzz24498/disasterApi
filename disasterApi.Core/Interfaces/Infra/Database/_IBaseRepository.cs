@@ -8,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace disasterApi.Core.Interfaces.Infra.Database
 {
-    public interface IBaseRepository<TEntity> where TEntity : IBaseEntity
+    public interface IBaseRepository<T>
     {
-        Task<TEntity> GetByIdAsync(Guid id);
-        Task<bool> DoesExist(Expression<Func<TEntity, bool>> predicate);
-        Task<TEntity> AddAsync(TEntity entity);
-        TEntity Update(TEntity entity);
-        TEntity Remove(TEntity entity);
+        IQueryable<T> FindAll(bool trackChanges);
+        IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges);
+        void Create(T entity);
+        void Update(T entity);
+        void Delete(T entity);
+        
         Task SaveChangesAsync();
     }
     

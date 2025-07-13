@@ -28,27 +28,29 @@ namespace disasterApi.Infra.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("AlertDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("AlertMessage")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DisasterType")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<Guid>("RegionId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("RiskLevel")
+                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -57,7 +59,7 @@ namespace disasterApi.Infra.Database.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.ToTable("Alerts", (string)null);
+                    b.ToTable("Alerts");
                 });
 
             modelBuilder.Entity("disasterApi.Domain.Entities.AlertSetting", b =>
@@ -70,15 +72,13 @@ namespace disasterApi.Infra.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DisasterType")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<Guid>("RegionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("RegionId1")
                         .HasColumnType("uuid");
 
                     b.Property<double>("ThresholdScore")
@@ -91,9 +91,7 @@ namespace disasterApi.Infra.Database.Migrations
 
                     b.HasIndex("RegionId");
 
-                    b.HasIndex("RegionId1");
-
-                    b.ToTable("AlertSettings", (string)null);
+                    b.ToTable("AlertSettings");
                 });
 
             modelBuilder.Entity("disasterApi.Domain.Entities.Region", b =>
@@ -123,7 +121,7 @@ namespace disasterApi.Infra.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Regions", (string)null);
+                    b.ToTable("Regions");
                 });
 
             modelBuilder.Entity("disasterApi.Domain.Entities.Alert", b =>
@@ -140,14 +138,10 @@ namespace disasterApi.Infra.Database.Migrations
             modelBuilder.Entity("disasterApi.Domain.Entities.AlertSetting", b =>
                 {
                     b.HasOne("disasterApi.Domain.Entities.Region", "Region")
-                        .WithMany()
+                        .WithMany("AlertSettings")
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("disasterApi.Domain.Entities.Region", null)
-                        .WithMany("AlertSettings")
-                        .HasForeignKey("RegionId1");
 
                     b.Navigation("Region");
                 });
