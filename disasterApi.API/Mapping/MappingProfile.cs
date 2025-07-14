@@ -9,8 +9,10 @@ namespace disasterApi.API.Mapping
         public MappingProfile()
         {
             CreateMap<RegionDto, Region>().ReverseMap();
-
             CreateMap<RegionForCreationDto, Region>().ReverseMap();
+
+            CreateMap<AlertSettingForCreationDto, AlertSetting>()
+                .ReverseMap();
         }
 
 

@@ -9,6 +9,7 @@ namespace disasterApi.Core.Interfaces.Infra.Database
     public interface IRepositoryManager
     {
         IRegionRepository RegionRepository { get; }
+        IAlertSettingRepository AlertSettingRepository { get; }
         Task SaveAsync();
 
     }
