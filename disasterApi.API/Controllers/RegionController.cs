@@ -5,13 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace disasterApi.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/regions")]
     public class RegionController : ControllerBase
     {
-        private readonly IRegionService _regionService;
-        public RegionController(IRegionService regionService)
+        private readonly IServiceManager _service;
+        public RegionController(IServiceManager service)
         {
-            _regionService = regionService;
+            _service = service;
         }
 
         [HttpPost]
@@ -19,7 +19,7 @@ namespace disasterApi.API.Controllers
         {
             try
             {
-                return Ok(await _regionService.CreateNewRegionAsync(input));
+                return Ok(await _service.RegionService.CreateNewRegionAsync(input));
             }
             catch (Exception ex)
             {
@@ -31,7 +31,7 @@ namespace disasterApi.API.Controllers
         {
             try
             {
-                return Ok(await _regionService.UpdateRegionAsync(id, input));
+                return Ok(await _service.RegionService.UpdateRegionAsync(id, input));
             }
             catch (ArgumentException ex)
             {
@@ -49,7 +49,7 @@ namespace disasterApi.API.Controllers
         {
             try
             {
-                return Ok(await _regionService.DeleteRegionAsync(id));
+                return Ok(await _service.RegionService.DeleteRegionAsync(id));
             }
             catch (ArgumentException ex)
             {
@@ -66,7 +66,7 @@ namespace disasterApi.API.Controllers
         {
             try
             {
-                return Ok(await _regionService.GetRegionByIdAsync(id));
+                return Ok(await _service.RegionService.GetRegionByIdAsync(id));
             }
             catch (ArgumentException ex)
             {
@@ -83,7 +83,7 @@ namespace disasterApi.API.Controllers
         {
             try
             {
-                return Ok(await _regionService.GetRegionsAsync(pageNumber, pageSize));
+                return Ok(await _service.RegionService.GetRegionsAsync(pageNumber, pageSize));
             }
             catch (Exception ex)
             {

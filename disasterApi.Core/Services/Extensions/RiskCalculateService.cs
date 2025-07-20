@@ -8,7 +8,7 @@ namespace disasterApi.Core.Services.Extensions
 {
     public class RiskCalculateService
     {
-        public static int CalculateFloodRisk(double rainfall)
+        public int CalculateFloodRisk(double rainfall)
         {
             if (rainfall > 50) return 100;
             else if (rainfall > 20) return 75;
@@ -17,7 +17,7 @@ namespace disasterApi.Core.Services.Extensions
             else return 0;
         }
 
-        public static int CalculateEarthquakeRisk(double magnitude)
+        public int CalculateEarthquakeRisk(double magnitude)
         {
             if (magnitude >= 7.0) return 100;
             else if (magnitude >= 5.0) return 75;

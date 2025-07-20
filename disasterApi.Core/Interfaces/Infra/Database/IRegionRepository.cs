@@ -13,6 +13,6 @@ namespace disasterApi.Core.Interfaces.Infra.Database
         void Delete(Region region);
         void Update(Region region);
         Task<Region?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Region>> GetAllAsync(int pageNumber, int pageSize);
+        Task<IEnumerable<Region>> GetAllAsync();
     }
 }

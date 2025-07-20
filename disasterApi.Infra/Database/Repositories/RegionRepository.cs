@@ -10,10 +10,9 @@ namespace disasterApi.Infra.Database.Repositories
         {
         }
 
-        public async Task<IEnumerable<Region>> GetAllAsync(int pageNumber, int pageSize) =>
+        public async Task<IEnumerable<Region>> GetAllAsync() =>
             await FindAll(false)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+               
                 .ToListAsync();
 
         public Task<Region?> GetByIdAsync(Guid id) => 

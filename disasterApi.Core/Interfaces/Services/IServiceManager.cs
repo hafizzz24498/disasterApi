@@ -11,5 +11,6 @@ namespace disasterApi.Core.Interfaces.Services
         IRegionService RegionService { get; }
         IExternalApiService ExternalApiService { get; }
         IAlertSettingService AlertSettingService { get; }
+        IDisasterRiskService DisasterRiskService { get; }
     }
 }
