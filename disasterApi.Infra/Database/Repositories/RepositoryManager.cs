@@ -12,16 +12,20 @@ namespace disasterApi.Infra.Database.Repositories
         private readonly DataContext _context;
         private readonly Lazy<IRegionRepository> _regionRepository;
         private readonly Lazy<IAlertSettingRepository> _alertSettingRepository;
+        private readonly Lazy<AlertRepository> _alertRepository;
 
         public RepositoryManager(DataContext context)
         {
             _context = context;
             _regionRepository = new Lazy<IRegionRepository>(() => new RegionRepository(_context));
             _alertSettingRepository = new Lazy<IAlertSettingRepository>(() => new AlertSettingRepository(_context));
+            _alertRepository = new Lazy<AlertRepository>(() => new AlertRepository(_context));
         }
         public IRegionRepository RegionRepository => _regionRepository.Value;
 
         public IAlertSettingRepository AlertSettingRepository => _alertSettingRepository.Value;
+
+        public IAlertRepository AlertRepository => _alertRepository.Value;
 
         public async Task SaveAsync()
         {

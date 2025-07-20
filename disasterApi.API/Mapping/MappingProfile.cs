@@ -13,6 +13,8 @@ namespace disasterApi.API.Mapping
 
             CreateMap<AlertSettingForCreationDto, AlertSetting>()
                 .ReverseMap();
+
+            CreateMap<AlertDto, Alert>().ReverseMap();
         }
 
 

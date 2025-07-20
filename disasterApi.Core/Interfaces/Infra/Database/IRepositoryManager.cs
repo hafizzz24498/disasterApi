@@ -10,6 +10,7 @@ namespace disasterApi.Core.Interfaces.Infra.Database
     {
         IRegionRepository RegionRepository { get; }
         IAlertSettingRepository AlertSettingRepository { get; }
+        IAlertRepository AlertRepository { get; }
         Task SaveAsync();
 
     }
