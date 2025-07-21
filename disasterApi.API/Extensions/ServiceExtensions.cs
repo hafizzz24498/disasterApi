@@ -24,5 +24,13 @@ namespace disasterApi.API.Extensions
             services.AddScoped<IRepositoryManager, RepositoryManager>();
         public static void ConfigureServiceManager(this IServiceCollection services) =>
             services.AddScoped<IServiceManager, ServiceManager>();
+
+        public static void ConfigureRedisCache(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddStackExchangeRedisCache(opt =>
+            {
+                opt.Configuration = config.GetConnectionString("Redis");
+            });
+        }
     }
 }

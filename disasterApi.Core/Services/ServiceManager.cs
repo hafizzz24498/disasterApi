@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -15,14 +16,14 @@ namespace disasterApi.Core.Services
         private readonly Lazy<IAlertService> _alertService;
         private readonly Lazy<INotificationService> _notificationService;
 
-        public ServiceManager(IRepositoryManager repository, IMapper mapper, IHttpClientFactory httpClient, ILoggerFactory loggerFactory, IConfiguration config)
+        public ServiceManager(IRepositoryManager repository, IMapper mapper, IHttpClientFactory httpClient, ILoggerFactory loggerFactory, IConfiguration config, IDistributedCache cache)
         {
-            _regionService = new Lazy<IRegionService>(() => new RegionService(repository, mapper));
+            _regionService = new Lazy<IRegionService>(() => new RegionService(repository, mapper, cache));
             _externalApiService = new Lazy<IExternalApiService>(() => new ExternalApiService(httpClient.CreateClient(), loggerFactory.CreateLogger<ExternalApiService>(), config));
             _alertSettingService = new Lazy<IAlertSettingService>(() => new AlertSettingService(repository, mapper, loggerFactory.CreateLogger<AlertSettingService>()));
-            _disasterRiskService = new Lazy<IDisasterRiskService>(() => new DisasterRiskService(repository, mapper, loggerFactory.CreateLogger<DisasterRiskService>(), _externalApiService.Value));
+            _disasterRiskService = new Lazy<IDisasterRiskService>(() => new DisasterRiskService(repository, loggerFactory.CreateLogger<DisasterRiskService>(), _externalApiService.Value, cache));
             _notificationService = new Lazy<INotificationService>(() => new NotificationService(config));
-            _alertService = new Lazy<IAlertService>(() => new AlertService(repository, mapper, _notificationService.Value));
+            _alertService = new Lazy<IAlertService>(() => new AlertService(repository, mapper, _notificationService.Value, cache, _disasterRiskService.Value));
         }
 
         public IRegionService RegionService => _regionService.Value;

@@ -1,4 +1,5 @@
 ﻿using disasterApi.Core.Interfaces.Infra.Database;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -18,10 +19,6 @@ namespace disasterApi.Infra.Database.Repositories
         public void Create(T entity) => RepositoryContext.Set<T>().Add(entity);
         public void Update(T entity) => RepositoryContext.Set<T>().Update(entity);
         public void Delete(T entity) => RepositoryContext.Set<T>().Remove(entity);
-
-        public async Task SaveChangesAsync()
-        {
-            await RepositoryContext.SaveChangesAsync();
-        }
+        public void BulkCreate(List<T> entities) => RepositoryContext.BulkInsert<T>(entities);
     }
 }

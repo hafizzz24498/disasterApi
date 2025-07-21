@@ -10,6 +10,8 @@ namespace disasterApi.Infra.Database.Repositories
         {
         }
 
+        public void BulkCreateAlert(List<Alert> alerts) => BulkCreate(alerts);
+
         public void CreateAlert(Alert alert) => Create(alert);
 
         public async Task<IEnumerable<Alert>> GetAlertsByRegionAsync(Guid regionId) => await FindByCondition(i => i.RegionId == regionId && i.IsDeleted.Equals(false), false).ToListAsync();

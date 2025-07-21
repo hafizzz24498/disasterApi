@@ -21,6 +21,7 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureControllers();
+builder.Services.ConfigureRedisCache(builder.Configuration);
 
 builder.Services.AddAutoMapper(x =>
 {

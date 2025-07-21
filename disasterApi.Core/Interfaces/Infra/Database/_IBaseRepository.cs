@@ -1,10 +1,4 @@
-﻿using disasterApi.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace disasterApi.Core.Interfaces.Infra.Database
 {
@@ -15,8 +9,7 @@ namespace disasterApi.Core.Interfaces.Infra.Database
         void Create(T entity);
         void Update(T entity);
         void Delete(T entity);
-        
-        Task SaveChangesAsync();
+        void BulkCreate(List<T> entities);
     }
     
 }

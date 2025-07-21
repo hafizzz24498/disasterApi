@@ -3,7 +3,8 @@ using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
 using disasterApi.Domain.Entities;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace disasterApi.Core.Services
 {
@@ -12,17 +13,30 @@ namespace disasterApi.Core.Services
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
+        private readonly IDistributedCache _cache;
+        private readonly IDisasterRiskService _disasterRiskService;
 
-        public AlertService(IRepositoryManager repository, IMapper mapper, INotificationService notificationService)
+        public AlertService(IRepositoryManager repository, IMapper mapper, INotificationService notificationService, IDistributedCache cache, IDisasterRiskService disasterRiskService)
         {
             _repository = repository;
             _mapper = mapper;
             _notificationService = notificationService;
+            _cache = cache;
+            _disasterRiskService = disasterRiskService;
         }
         public async Task<IEnumerable<AlertDto>> GetAlertsAsync()
         {
+            var alertCache = await _cache.GetStringAsync("AlertData");
+            if(alertCache != null)
+            {
+                var cache = _mapper.Map<IEnumerable<AlertDto>>(JsonSerializer.Deserialize<IEnumerable<AlertDto>>(alertCache));
+                if(cache != null)
+                    return cache;
+            }
+
             var alerts = await _repository.AlertRepository.GetAllAlert();
 
+            await _cache.SetStringAsync("AlertData", JsonSerializer.Serialize(alerts));
             return _mapper.Map<IEnumerable<AlertDto>>(alerts);
         }
 
@@ -34,52 +48,75 @@ namespace disasterApi.Core.Services
 
         public async Task SendAlertAsync(AlertSendDto alertSendDto)
         {
-            var alertSetting = await _repository.AlertSettingRepository.GetByRegionIdAsync(alertSendDto.RegionId);
-            //if (alertSendDto.Methods.Contains("Message"))
-            //{
-            //    if (alertSendDto.PhoneNumbers == null || alertSendDto.PhoneNumbers.Count == 0)
-            //    {
-            //        throw new ArgumentException("Phone number list cannot be null or empty when sending message alerts.");
-            //    }
 
-            //    foreach (var phoneNumber in alertSendDto.PhoneNumbers)
-            //    {
-            //        await _notificationService.SendMessageAsync(alertSendDto.Message, phoneNumber);
-            //    }
-            //}
-            //if (alertSendDto.Methods.Contains("Email"))
-            //{
-            //    if (alertSendDto.Emails == null || alertSendDto.Emails.Count == 0)
-            //    {
-            //        throw new ArgumentException("Email list cannot be null or empty when sending email alerts.");
-            //    }
-            //    await _notificationService.SendEmailAsync("alert", alertSendDto.Message, alertSendDto.Emails);
-            //}
+            var cacheData = await _cache.GetStringAsync("DisasterRiskData");
+            var risks = !string.IsNullOrEmpty(cacheData)
+                ? JsonSerializer.Deserialize<List<DisasterRiskReportDto>>(cacheData) ?? new()
+                : await _disasterRiskService.GetDisasterRiskReportAsync();
 
-            var alert = new Alert
+
+            var getRiskReportByRegion = risks.Where(i => i.RegionId == alertSendDto.RegionId && i.RiskLevel == "High").ToList();
+            if(getRiskReportByRegion.Count == 0)
             {
-                Id = Guid.NewGuid(),
-                RegionId = alertSendDto.RegionId,
-                DisasterType = alertSendDto.DisasterType,
-                AlertMessage = alertSendDto.Message,
-                Timestamp = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsDeleted = false,
-
-            };
-
-            _repository.AlertRepository.CreateAlert(alert);
-            try
-            {
-                await _repository.SaveAsync();
+                return;
             }
-            catch (Exception ex)
-            {
-                // Log the exception or handle it as needed
-                throw new InvalidOperationException($"Failed to save alert. {ex.Message}");
 
+            List<Alert> alerts= new List<Alert>();
+            foreach(var disasterRisk in getRiskReportByRegion)
+            {
+
+                var message = GenerateAlertMessage(disasterRisk.DisasterType ?? "");
+                if (alertSendDto.Methods.Contains("Message"))
+                {
+                    if (alertSendDto.PhoneNumbers == null || alertSendDto.PhoneNumbers.Count == 0)
+                    {
+                        throw new ArgumentException("Phone number list cannot be null or empty when sending message alerts.");
+                    }
+
+                    foreach (var phoneNumber in alertSendDto.PhoneNumbers)
+                    {
+                        await _notificationService.SendMessageAsync(message,phoneNumber);
+                    }
+                }
+                if (alertSendDto.Methods.Contains("Email"))
+                {
+                    if (alertSendDto.Emails == null || alertSendDto.Emails.Count == 0)
+                    {
+                        throw new ArgumentException("Email list cannot be null or empty when sending email alerts.");
+                    }
+                    await _notificationService.SendEmailAsync($"Alert-{disasterRisk.DisasterType}", message, alertSendDto.Emails);
+                }
+
+                var alert = new Alert
+                {
+                    Id = Guid.NewGuid(),
+                    RegionId = alertSendDto.RegionId,
+                    DisasterType = disasterRisk.DisasterType ?? "",
+                    AlertMessage = message,
+                    Timestamp = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false,
+                };
+                alerts.Add(alert);
             }
+
+            _repository.AlertRepository.BulkCreateAlert(alerts);
+            await _repository.SaveAsync();
         }
+
+        private string GenerateAlertMessage(string disasterType)
+        {
+            return disasterType.ToLower() switch
+            {
+                "flood" => $"⚠️ [FLOOD WARNING] Severe flooding risk detected in . Please evacuate if necessary and stay tuned to local news.",
+                "earthquake" => $"⚠️ [EARTHQUAKE ALERT] Possible seismic activity near . Stay away from buildings and take safety measures.",
+                "storm" => $"⚠️ [STORM WARNING] Strong storm approaching . Secure loose items and remain indoors.",
+                "wildfire" => $"🔥 [WILDFIRE ALERT] Wildfire threat detected in . Prepare for possible evacuation.",
+                "tsunami" => $"🌊 [TSUNAMI ALERT] Potential tsunami risk in coastal areas near . Evacuate to higher ground immediately.",
+                _ => $"⚠️ [DISASTER ALERT] A high-risk event ({disasterType}) has been detected in . Stay alert and follow safety instructions."
+            };
+        }
+
     }
 }

@@ -3,6 +3,8 @@ using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
 using disasterApi.Domain.Entities;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace disasterApi.Core.Services
 {
@@ -10,10 +12,12 @@ namespace disasterApi.Core.Services
     {
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
-        public RegionService(IRepositoryManager Repository, IMapper mapper)
+        private readonly IDistributedCache _cache;
+        public RegionService(IRepositoryManager Repository, IMapper mapper, IDistributedCache cache)
         {
             _repository = Repository;
             _mapper = mapper;
+            _cache = cache;
         }
 
         public async Task<RegionDto> CreateNewRegionAsync(RegionForCreationDto input)
@@ -48,6 +52,12 @@ namespace disasterApi.Core.Services
 
         public async Task<RegionDto> GetRegionByIdAsync(Guid id)
         {
+            var cacheRegion = await _cache.GetStringAsync(id.ToString(), CancellationToken.None);
+
+            if(cacheRegion != null)
+            {
+                return _mapper.Map<RegionDto>(JsonSerializer.Deserialize<Region>(cacheRegion));
+            }
             var region = await _repository.RegionRepository.GetByIdAsync(id);
 
             if (region == null || region.IsDeleted)
@@ -55,6 +65,7 @@ namespace disasterApi.Core.Services
                 throw new ArgumentException("Region not found");
             }
 
+            await _cache.SetStringAsync(region.Id.ToString(), JsonSerializer.Serialize(region), CancellationToken.None);
             return _mapper.Map<RegionDto>(region);
         }
 

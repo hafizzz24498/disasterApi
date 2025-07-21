@@ -3,8 +3,9 @@ using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
 using disasterApi.Core.Services.Extensions;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace disasterApi.Core.Services
 {
@@ -12,18 +13,16 @@ namespace disasterApi.Core.Services
     {
 
         private readonly IRepositoryManager _repository;
-        private readonly IMapper _mapper;
         private readonly ILogger<DisasterRiskService> _logger;
         private readonly IExternalApiService _externalDataService;
-        private readonly RiskCalculateService _riskCalculateService;
+        private readonly IDistributedCache _cache;
 
-        public DisasterRiskService(IRepositoryManager repository, IMapper mapper, ILogger<DisasterRiskService> logger, IExternalApiService externalApiService)
+        public DisasterRiskService(IRepositoryManager repository, ILogger<DisasterRiskService> logger, IExternalApiService externalApiService, IDistributedCache cache)
         {
             _repository = repository;
-            _mapper = mapper;
             _logger = logger;
             _externalDataService = externalApiService;
-            _riskCalculateService = new RiskCalculateService();
+            _cache = cache;
         }
         public async Task<List<DisasterRiskReportDto>> GetDisasterRiskReportAsync()
         {
@@ -106,6 +105,15 @@ namespace disasterApi.Core.Services
                 }
             }
             _logger.LogInformation("Disaster risk assessment completed. Generated {Count} reports.", riskReports.Count);
+
+            var options = new DistributedCacheEntryOptions()
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(5),
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            };
+
+            await _cache.SetStringAsync("DisasterRiskData", JsonSerializer.Serialize(riskReports), options, CancellationToken.None);
+
             return riskReports;
         }
     }
