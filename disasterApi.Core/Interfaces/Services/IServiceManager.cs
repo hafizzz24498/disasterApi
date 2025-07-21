@@ -13,5 +13,6 @@ namespace disasterApi.Core.Interfaces.Services
         IAlertSettingService AlertSettingService { get; }
         IDisasterRiskService DisasterRiskService { get; }
         IAlertService AlertService { get; }
+        INotificationService NotificationService { get; }
     }
 }

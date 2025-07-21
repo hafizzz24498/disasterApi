@@ -1,4 +1,5 @@
-﻿using disasterApi.Core.Interfaces.Services;
+﻿using disasterApi.Core.Dtos;
+using disasterApi.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace disasterApi.API.Controllers
@@ -33,6 +34,24 @@ namespace disasterApi.API.Controllers
             {
                 var alerts = await _service.AlertService.GetAlertsByRegionAsync(regionId);
                 return Ok(alerts);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPost("send/")]
+        public async Task<IActionResult> SendAlertAsync([FromBody] AlertSendDto alertSendDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                await _service.AlertService.SendAlertAsync(alertSendDto);
+                return Ok("Alert sent successfully.");
             }
             catch (Exception ex)
             {

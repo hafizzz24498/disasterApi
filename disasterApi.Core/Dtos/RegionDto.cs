@@ -2,12 +2,14 @@
 {
     public record RegionDto
     {
-        public Guid Id { get; set; }
+        public Guid RegionId { get; set; }
+        public Location LocationCoordinates { get; set; } = new();
+        public List<string> DisasterTypes { get; set; } = new();    
+    }
+
+    public record Location
+    {
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public List<string> DisasterTypes { get; set; } = new();
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        
     }
 }

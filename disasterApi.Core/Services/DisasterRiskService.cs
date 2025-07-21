@@ -55,17 +55,17 @@ namespace disasterApi.Core.Services
                         {
                             case "flood":
                                 weatherData = await _externalDataService.GetWeatherDataAsync(region.Latitude, region.Longitude);
-                                riskScore = _riskCalculateService.CalculateFloodRisk(weatherData.Current?.Rain?.OneHour ?? 0);
+                                riskScore = RiskCalculateService.CalculateFloodRisk(weatherData.Current?.Rain?.OneHour ?? 0);
                                 dataFetched = true;
                                 break;
                             case "earthquake":
                                 seismicData = await _externalDataService.GetEarthquakeDataAsync(region.Latitude, region.Longitude);
-                                riskScore = _riskCalculateService.CalculateEarthquakeRisk(seismicData?.Features?.Max(i => i.Properties?.Mag ?? 0) ?? 0);
+                                riskScore = RiskCalculateService.CalculateEarthquakeRisk(seismicData?.Features?.Max(i => i.Properties?.Mag ?? 0) ?? 0);
                                 dataFetched = true;
                                 break;
                             case "wildfire":
                                 weatherData = await _externalDataService.GetWeatherDataAsync(region.Latitude, region.Longitude);
-                                riskScore = _riskCalculateService.CalculateWildfireRisk(weatherData?.Current?.Temp ?? 0, weatherData?.Current?.Humidity ?? 0);
+                                riskScore = RiskCalculateService.CalculateWildfireRisk(weatherData?.Current?.Temp ?? 0, weatherData?.Current?.Humidity ?? 0);
                                 dataFetched = true;
                                 break;
                             default:
@@ -90,7 +90,7 @@ namespace disasterApi.Core.Services
                         RegionId = region.Id,
                         DisasterType = disasterType,
                         RiskScore = riskScore,
-                        RiskLevel = _riskCalculateService.GetRiskLevel(riskScore),
+                        RiskLevel = RiskCalculateService.GetRiskLevel(riskScore),
                         AlerrtTriggered = false
                     };
 

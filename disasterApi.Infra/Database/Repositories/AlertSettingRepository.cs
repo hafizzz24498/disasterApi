@@ -15,16 +15,17 @@ namespace disasterApi.Infra.Database.Repositories
         {
         }
 
-        public async Task<IEnumerable<AlertSetting>> GetAllAsync() => await FindAll(false).ToListAsync();
+        public async Task<IEnumerable<AlertSetting>> GetAllAsync() => await FindByCondition(i => i.IsDeleted.Equals(false), false).ToListAsync();
 
         public async Task<AlertSetting?> GetByRegionIdAndDisasterTypeAsync(Guid regionId, string disasterType)
         {
-            return await FindByCondition(i => i.RegionId == regionId && i.DisasterType == disasterType, false).FirstOrDefaultAsync();
+            return await FindByCondition(i => i.RegionId == regionId && i.DisasterType == disasterType && i.IsDeleted.Equals(false), false).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<AlertSetting>> GetByRegionIdAsync(Guid regionId)
         {
-            return await FindByCondition(i => i.RegionId == regionId, false).ToListAsync();
+            var alertSetting =  await FindByCondition(i => i.RegionId == regionId && i.IsDeleted.Equals(false), false).ToListAsync();
+            return alertSetting;
         }
     }
 }

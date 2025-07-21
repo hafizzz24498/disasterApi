@@ -13,6 +13,7 @@ namespace disasterApi.Core.Services
         private readonly Lazy<IAlertSettingService> _alertSettingService;
         private readonly Lazy<IDisasterRiskService> _disasterRiskService;
         private readonly Lazy<IAlertService> _alertService;
+        private readonly Lazy<INotificationService> _notificationService;
 
         public ServiceManager(IRepositoryManager repository, IMapper mapper, IHttpClientFactory httpClient, ILoggerFactory loggerFactory, IConfiguration config)
         {
@@ -20,7 +21,8 @@ namespace disasterApi.Core.Services
             _externalApiService = new Lazy<IExternalApiService>(() => new ExternalApiService(httpClient.CreateClient(), loggerFactory.CreateLogger<ExternalApiService>(), config));
             _alertSettingService = new Lazy<IAlertSettingService>(() => new AlertSettingService(repository, mapper, loggerFactory.CreateLogger<AlertSettingService>()));
             _disasterRiskService = new Lazy<IDisasterRiskService>(() => new DisasterRiskService(repository, mapper, loggerFactory.CreateLogger<DisasterRiskService>(), _externalApiService.Value));
-            _alertService = new Lazy<IAlertService>(() => new AlertService(repository, mapper));
+            _notificationService = new Lazy<INotificationService>(() => new NotificationService(config));
+            _alertService = new Lazy<IAlertService>(() => new AlertService(repository, mapper, _notificationService.Value));
         }
 
         public IRegionService RegionService => _regionService.Value;
@@ -32,5 +34,7 @@ namespace disasterApi.Core.Services
         public IDisasterRiskService DisasterRiskService => _disasterRiskService.Value;
 
         public IAlertService AlertService => _alertService.Value;
+
+        public INotificationService NotificationService => _notificationService.Value;
     }
 }

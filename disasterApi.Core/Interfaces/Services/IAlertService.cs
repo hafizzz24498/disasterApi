@@ -11,5 +11,6 @@ namespace disasterApi.Core.Interfaces.Services
     {
         Task<IEnumerable<AlertDto>> GetAlertsByRegionAsync(Guid regionId);
         Task<IEnumerable<AlertDto>> GetAlertsAsync();
+        Task SendAlertAsync(AlertSendDto alertSendDto);
     }
 }

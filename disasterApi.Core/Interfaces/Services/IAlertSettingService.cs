@@ -1,14 +1,11 @@
 ﻿using disasterApi.Core.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace disasterApi.Core.Interfaces.Services
 {
     public interface IAlertSettingService
     {
-        Task ConfigureAlertSettingAsync(AlertSettingForCreationDto alertSettingForCreationDto);
+        Task<IEnumerable<AlertSettingDto>> ConfigureAlertSettingAsync(AlertSettingForCreationDto alertSettingForCreationDto);
+        Task<IEnumerable<AlertSettingDto>> GetAlertSettings();
+        Task<IEnumerable<AlertSettingDto>> GetAlertSettingsByRegionIdAsync(Guid regionId);
     }
 }

@@ -4,11 +4,6 @@ using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
 using disasterApi.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace disasterApi.Core.Services
 {
@@ -25,7 +20,7 @@ namespace disasterApi.Core.Services
             _logger = logger;
         }
 
-        public async Task ConfigureAlertSettingAsync(AlertSettingForCreationDto dto)
+        public async Task<IEnumerable<AlertSettingDto>> ConfigureAlertSettingAsync(AlertSettingForCreationDto dto)
         {
             _logger.LogInformation("Attempting to configure alert setting for RegionID: {RegionId}, DisasterType: {DisasterType}", dto.RegionId, dto.DisasterType);
 
@@ -67,6 +62,22 @@ namespace disasterApi.Core.Services
             }
 
             await _repository.SaveAsync();
+
+            return await GetAlertSettingsByRegionIdAsync(dto.RegionId);
+        }
+
+        public async Task<IEnumerable<AlertSettingDto>> GetAlertSettings()
+        {
+            var alertSettings = await _repository.AlertSettingRepository.GetAllAsync();
+
+            return _mapper.Map<IEnumerable<AlertSettingDto>>(alertSettings);
+        }
+
+        public async Task<IEnumerable<AlertSettingDto>> GetAlertSettingsByRegionIdAsync(Guid regionId)
+        {
+            var alertSettings = await _repository.AlertSettingRepository.GetByRegionIdAsync(regionId);
+            return _mapper.Map<IEnumerable<AlertSettingDto>>(alertSettings);
+
         }
     }
 }
