@@ -28,7 +28,7 @@ namespace disasterApi.Core.Services
         {
             _logger.LogInformation("Fetching disaster risk report...");
             var riskReports = new List<DisasterRiskReportDto>();
-            var regions = await _repository.RegionRepository.GetAllAsync();
+            var regions = await _repository.RegionRepository.GetAllAsync(false);
             if (regions == null || !regions.Any())
             {
                 _logger.LogWarning("No regions found for disaster risk report.");

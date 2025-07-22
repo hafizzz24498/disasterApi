@@ -24,7 +24,7 @@ namespace disasterApi.Core.Services
         {
             _logger.LogInformation("Attempting to configure alert setting for RegionID: {RegionId}, DisasterType: {DisasterType}", dto.RegionId, dto.DisasterType);
 
-            var region = await _repository.RegionRepository.GetByIdAsync(dto.RegionId);
+            var region = await _repository.RegionRepository.GetByIdAsync(dto.RegionId, false);
             if (region == null)
             {
                 _logger.LogWarning("Region with RegionID {RegionId} not found.", dto.RegionId);

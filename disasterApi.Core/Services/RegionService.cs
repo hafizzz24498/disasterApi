@@ -3,6 +3,7 @@ using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
 using disasterApi.Domain.Entities;
+using disasterApi.Domain.Exceptions;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
@@ -27,25 +28,11 @@ namespace disasterApi.Core.Services
             region.CreatedAt = DateTime.UtcNow;
             region.UpdatedAt = DateTime.UtcNow;
             region.IsDeleted = false;
+            
             _repository.RegionRepository.Create(region);
             await _repository.SaveAsync();
 
-            return _mapper.Map<RegionDto>(region);
-        }
-
-        public async Task<RegionDto> DeleteRegionAsync(Guid id)
-        {
-            var region = await _repository.RegionRepository.GetByIdAsync(id);
-
-            if (region == null || region.IsDeleted== true)
-            {
-                throw new ArgumentException("Region not found");
-            }
-
-            region.IsDeleted = true;
-            region.UpdatedAt = DateTime.UtcNow;
-            _repository.RegionRepository.Update(region);
-            await _repository.SaveAsync();
+            await _cache.SetStringAsync(region.Id.ToString(), JsonSerializer.Serialize(region), CancellationToken.None);
 
             return _mapper.Map<RegionDto>(region);
         }
@@ -58,36 +45,21 @@ namespace disasterApi.Core.Services
             {
                 return _mapper.Map<RegionDto>(JsonSerializer.Deserialize<Region>(cacheRegion));
             }
-            var region = await _repository.RegionRepository.GetByIdAsync(id);
+            var region = await _repository.RegionRepository.GetByIdAsync(id, false);
 
             if (region == null || region.IsDeleted)
             {
-                throw new ArgumentException("Region not found");
+                throw new NotFoundException("Region Not Found!");
             }
 
             await _cache.SetStringAsync(region.Id.ToString(), JsonSerializer.Serialize(region), CancellationToken.None);
             return _mapper.Map<RegionDto>(region);
         }
 
-        public Task<PaginationResponse<RegionDto>> GetRegionsAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<RegionDto>> GetRegionsAsync(int pageNumber, int pageSize)
         {
-            throw new NotImplementedException("Paging not implemented yet");
-        }
-
-        public async Task<RegionDto> UpdateRegionAsync(Guid id, RegionForCreationDto input)
-        {
-            var region = await _repository.RegionRepository.GetByIdAsync(id);
-            if (region == null || region.IsDeleted == true)
-            {
-                throw new ArgumentException("Region not found");
-            }
-            
-            _mapper.Map(input, region);
-            region.UpdatedAt = DateTime.UtcNow;
-            _repository.RegionRepository.Update(region);
-            await _repository.SaveAsync();
-
-            return _mapper.Map<RegionDto>(region);
+            var regions = await _repository.RegionRepository.GetAllAsync(false);
+            return _mapper.Map<IEnumerable<RegionDto>>(regions);
         }
     }
 }

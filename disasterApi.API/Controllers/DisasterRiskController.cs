@@ -19,7 +19,6 @@ namespace disasterApi.API.Controllers
         [HttpGet]
         public async Task<IActionResult> CreateNewDisasterRiskAsync()
         {
-            _logger.LogInformation("Received GET request for /api/disaster-risks.");
             try
             {
                 var riskReports = await _serviceManager.DisasterRiskService.GetDisasterRiskReportAsync();

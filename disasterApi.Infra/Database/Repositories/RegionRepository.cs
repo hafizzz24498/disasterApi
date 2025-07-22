@@ -10,12 +10,10 @@ namespace disasterApi.Infra.Database.Repositories
         {
         }
 
-        public async Task<IEnumerable<Region>> GetAllAsync() =>
-            await FindAll(false)
-               
-                .ToListAsync();
+        public async Task<IEnumerable<Region>> GetAllAsync(bool trackChanges) =>
+            await FindByCondition(i => i.IsDeleted.Equals(false), trackChanges).ToListAsync();
 
-        public Task<Region?> GetByIdAsync(Guid id) => 
-            FindByCondition(region => region.Id == id, false).FirstOrDefaultAsync();
+        public Task<Region?> GetByIdAsync(Guid id, bool trackChanges) => 
+            FindByCondition(i => i.Id == id && i.IsDeleted.Equals(false), false).FirstOrDefaultAsync();
     }
 }

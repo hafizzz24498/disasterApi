@@ -1,4 +1,5 @@
-﻿using disasterApi.Core.Dtos;
+﻿using disasterApi.API.Extensions;
+using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,45 +16,12 @@ namespace disasterApi.API.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<ActionResult<RegionDto>> CreateNewRegionAsync([FromBody] RegionForCreationDto input)
         {
             try
             {
                 return Ok(await _service.RegionService.CreateNewRegionAsync(input));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-        [HttpPut("{id}")]
-        public async Task<ActionResult<RegionDto>> UpdateRegionAsync(Guid id, [FromBody] RegionForCreationDto input)
-        {
-            try
-            {
-                return Ok(await _service.RegionService.UpdateRegionAsync(id, input));
-            }
-            catch (ArgumentException ex)
-            {
-                return StatusCode(StatusCodes.Status404NotFound, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-            
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<RegionDto>> DeleteRegionAsync(Guid id)
-        {
-            try
-            {
-                return Ok(await _service.RegionService.DeleteRegionAsync(id));
-            }
-            catch (ArgumentException ex)
-            {
-                return StatusCode(StatusCodes.Status404NotFound, ex.Message);
             }
             catch (Exception ex)
             {

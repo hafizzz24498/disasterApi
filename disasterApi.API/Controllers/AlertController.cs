@@ -1,4 +1,5 @@
-﻿using disasterApi.Core.Dtos;
+﻿using disasterApi.API.Extensions;
+using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,27 +28,10 @@ namespace disasterApi.API.Controllers
             }
         }
 
-        [HttpGet("region/{regionId}")]
-        public async Task<IActionResult> GetAlertByRegion(Guid regionId)
-        {
-            try
-            {
-                var alerts = await _service.AlertService.GetAlertsByRegionAsync(regionId);
-                return Ok(alerts);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
         [HttpPost("send/")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> SendAlertAsync([FromBody] AlertSendDto alertSendDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             try
             {
                 await _service.AlertService.SendAlertAsync(alertSendDto);
@@ -58,7 +42,5 @@ namespace disasterApi.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using disasterApi.Core.Dtos;
+﻿using disasterApi.API.Extensions;
+using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,14 +19,9 @@ namespace disasterApi.API.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateAlertSetting([FromBody] AlertSettingForCreationDto alertSetting)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("Invalid model state for ConfigureAlertSetting: {Errors}", ModelState); 
-                return StatusCode(StatusCodes.Status500InternalServerError, "rter");
-            }
-
             try
             {
                 var alertSettings = await _serviceManager.AlertSettingService.ConfigureAlertSettingAsync(alertSetting);
@@ -49,11 +45,6 @@ namespace disasterApi.API.Controllers
             try
             {
                 var alertSettings = await _serviceManager.AlertSettingService.GetAlertSettingsByRegionIdAsync(regionId);
-                if (alertSettings == null || !alertSettings.Any())
-                {
-                    _logger.LogInformation("No alert settings found for RegionID: {RegionId}", regionId);
-                    return NotFound($"No alert settings found for RegionID: {regionId}");
-                }
                 return Ok(alertSettings);
             }
             catch (Exception ex)

@@ -1,6 +1,7 @@
 using disasterApi.API.Extensions;
 using disasterApi.API.Mapping;
 using disasterApi.Infra.Database;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
@@ -32,7 +33,7 @@ builder.Services.AddHttpClient();
 
 
 var app = builder.Build();
-
+app.ConfigureExceptionHanlder();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
