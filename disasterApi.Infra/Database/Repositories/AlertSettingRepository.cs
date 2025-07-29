@@ -1,11 +1,6 @@
 ﻿using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace disasterApi.Infra.Database.Repositories
 {
@@ -17,9 +12,9 @@ namespace disasterApi.Infra.Database.Repositories
 
         public async Task<IEnumerable<AlertSetting>> GetAllAsync() => await FindByCondition(i => i.IsDeleted.Equals(false), false).ToListAsync();
 
-        public async Task<AlertSetting?> GetByRegionIdAndDisasterTypeAsync(Guid regionId, string disasterType)
+        public async Task<AlertSetting?> GetByRegionIdAndDisasterTypeAsync(Guid regionId, string disasterType, bool trackChanges)
         {
-            return await FindByCondition(i => i.RegionId == regionId && i.DisasterType == disasterType && i.IsDeleted.Equals(false), false).FirstOrDefaultAsync();
+            return await FindByCondition(i => i.RegionId == regionId && i.DisasterType == disasterType && i.IsDeleted.Equals(false), trackChanges).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<AlertSetting>> GetByRegionIdAsync(Guid regionId)

@@ -8,27 +8,19 @@ namespace disasterApi.API.Controllers
     public class DisasterRiskController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
-        private readonly ILogger<DisasterRiskController> _logger;
 
-        public DisasterRiskController(IServiceManager serviceManager, ILogger<DisasterRiskController> logger)
+        public DisasterRiskController(IServiceManager serviceManager)
         {
             _serviceManager = serviceManager;
-            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> CreateNewDisasterRiskAsync()
         {
-            try
-            {
-                var riskReports = await _serviceManager.DisasterRiskService.GetDisasterRiskReportAsync();
-                return Ok(riskReports);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An unexpected error occurred while processing GET /api/disaster-risks: {Message}", ex.Message); //
-                return StatusCode(StatusCodes.Status500InternalServerError, "An internal server error occurred while retrieving disaster risks.");
-            }
+            
+            var riskReports = await _serviceManager.DisasterRiskService.GetDisasterRiskReportAsync();
+            return Ok(riskReports);
+            
         }
     }
 }

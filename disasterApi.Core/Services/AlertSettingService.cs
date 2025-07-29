@@ -3,6 +3,7 @@ using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
 using disasterApi.Domain.Entities;
+using disasterApi.Domain.Exceptions;
 using Microsoft.Extensions.Logging;
 
 namespace disasterApi.Core.Services
@@ -28,17 +29,16 @@ namespace disasterApi.Core.Services
             if (region == null)
             {
                 _logger.LogWarning("Region with RegionID {RegionId} not found.", dto.RegionId);
-                throw new ArgumentException($"Region with ID '{dto.RegionId}' not found.");
+                throw new NotFoundException($"Region not found.");
             }
 
             if (!region.DisasterTypes.Contains(dto.DisasterType, StringComparer.OrdinalIgnoreCase))
             {
                 _logger.LogWarning("Disaster type '{DisasterType}' is not monitored for RegionID: {RegionId}.", dto.DisasterType, dto.RegionId);
-                throw new ArgumentException($"Disaster type '{dto.DisasterType}' is not configured for monitoring in region '{dto.RegionId}'. Monitored types: {string.Join(", ", region.DisasterTypes)}");
+                throw new BadRequestException($"Disaster type '{dto.DisasterType}' is not configured for monitoring in region. Monitored types: {string.Join(", ", region.DisasterTypes)}");
             }
 
-            var existingAlertSetting = await _repository.AlertSettingRepository.GetByRegionIdAndDisasterTypeAsync(region.Id, dto.DisasterType ?? "");
-
+            var existingAlertSetting = await _repository.AlertSettingRepository.GetByRegionIdAndDisasterTypeAsync(region.Id, dto.DisasterType ?? "", true);
             if (existingAlertSetting == null)
             {
 
@@ -57,20 +57,11 @@ namespace disasterApi.Core.Services
                 // Update existing alert setting
                 existingAlertSetting.ThresholdScore = dto.ThresholdScore;
                 existingAlertSetting.UpdatedAt = DateTime.UtcNow;
-                _repository.AlertSettingRepository.Update(existingAlertSetting);
                 _logger.LogInformation("Existing alert setting updated for RegionID: {RegionId}, DisasterType: {DisasterType}, New Threshold: {ThresholdScore}", dto.RegionId, dto.DisasterType, dto.ThresholdScore);
             }
 
             await _repository.SaveAsync();
-
             return await GetAlertSettingsByRegionIdAsync(dto.RegionId);
-        }
-
-        public async Task<IEnumerable<AlertSettingDto>> GetAlertSettings()
-        {
-            var alertSettings = await _repository.AlertSettingRepository.GetAllAsync();
-
-            return _mapper.Map<IEnumerable<AlertSettingDto>>(alertSettings);
         }
 
         public async Task<IEnumerable<AlertSettingDto>> GetAlertSettingsByRegionIdAsync(Guid regionId)

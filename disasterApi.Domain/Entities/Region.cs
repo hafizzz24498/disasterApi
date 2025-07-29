@@ -10,7 +10,7 @@ namespace disasterApi.Domain.Entities
         [Required]
         public double Latitude { get; set; }
         [Required]
-        public double Longitude { get; set; }
+        public double Longtitude { get; set; }
         [Required]
         public List<string> DisasterTypes { get; set; } = new List<string>();
         [Required]

@@ -9,7 +9,7 @@ namespace disasterApi.Core.Interfaces.Infra.Database
 {
     public interface IAlertSettingRepository
     {
-        Task<AlertSetting?> GetByRegionIdAndDisasterTypeAsync(Guid regionId, string disasterType);
+        Task<AlertSetting?> GetByRegionIdAndDisasterTypeAsync(Guid regionId, string disasterType, bool trackChanges);
         void Create(AlertSetting alertSetting);
         void Update(AlertSetting alertSetting);
         Task<IEnumerable<AlertSetting>> GetAllAsync();

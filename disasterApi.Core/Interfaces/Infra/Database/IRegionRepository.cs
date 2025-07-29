@@ -7,5 +7,6 @@ namespace disasterApi.Core.Interfaces.Infra.Database
         void Create(Region region);
         Task<Region?> GetByIdAsync(Guid id, bool trackChanges);
         Task<IEnumerable<Region>> GetAllAsync(bool trackChanges);
+        Task<Region?> GetRegionByLatitudeAndLongtitude(double latitude, double longtitude, bool trackChanges);
     }
 }

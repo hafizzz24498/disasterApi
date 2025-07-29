@@ -6,7 +6,6 @@ namespace disasterApi.Core.Interfaces.Infra.Database
     {
         Task<IEnumerable<Alert>> GetAllAlert();
         Task<IEnumerable<Alert>> GetAlertsByRegionAsync(Guid regionId);
-        void CreateAlert(Alert alert);
         void BulkCreateAlert(List<Alert> alerts);
     }
 }

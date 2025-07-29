@@ -1,7 +1,6 @@
 using disasterApi.API.Extensions;
 using disasterApi.API.Mapping;
 using disasterApi.Infra.Database;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
@@ -23,6 +22,7 @@ builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureControllers();
 builder.Services.ConfigureRedisCache(builder.Configuration);
+builder.Services.AddScoped<ValidationFilterAttribute>();
 
 builder.Services.AddAutoMapper(x =>
 {

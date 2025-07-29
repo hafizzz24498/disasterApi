@@ -3,6 +3,7 @@ using disasterApi.Core.Dtos;
 using disasterApi.Core.Interfaces.Infra.Database;
 using disasterApi.Core.Interfaces.Services;
 using disasterApi.Domain.Entities;
+using disasterApi.Domain.Exceptions;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
@@ -54,11 +55,10 @@ namespace disasterApi.Core.Services
                 ? JsonSerializer.Deserialize<List<DisasterRiskReportDto>>(cacheData) ?? new()
                 : await _disasterRiskService.GetDisasterRiskReportAsync();
 
-
-            var getRiskReportByRegion = risks.Where(i => i.RegionId == alertSendDto.RegionId && i.RiskLevel == "High").ToList();
+            var getRiskReportByRegion = risks.Where(i => i.RegionId == alertSendDto.RegionId && (i.RiskLevel == "High" || i.AlerrtTriggered == true)).ToList();
             if(getRiskReportByRegion.Count == 0)
             {
-                return;
+                throw new BadRequestException("No risk report for this region to alert");
             }
 
             List<Alert> alerts= new List<Alert>();
@@ -70,7 +70,7 @@ namespace disasterApi.Core.Services
                 {
                     if (alertSendDto.PhoneNumbers == null || alertSendDto.PhoneNumbers.Count == 0)
                     {
-                        throw new ArgumentException("Phone number list cannot be null or empty when sending message alerts.");
+                        throw new BadRequestException("Phone number list cannot be null or empty when sending message alerts.");
                     }
 
                     foreach (var phoneNumber in alertSendDto.PhoneNumbers)
@@ -82,7 +82,7 @@ namespace disasterApi.Core.Services
                 {
                     if (alertSendDto.Emails == null || alertSendDto.Emails.Count == 0)
                     {
-                        throw new ArgumentException("Email list cannot be null or empty when sending email alerts.");
+                        throw new BadRequestException("Email list cannot be null or empty when sending email alerts.");
                     }
                     await _notificationService.SendEmailAsync($"Alert-{disasterRisk.DisasterType}", message, alertSendDto.Emails);
                 }
@@ -94,9 +94,6 @@ namespace disasterApi.Core.Services
                     DisasterType = disasterRisk.DisasterType ?? "",
                     AlertMessage = message,
                     Timestamp = DateTime.UtcNow,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    IsDeleted = false,
                 };
                 alerts.Add(alert);
             }
@@ -105,15 +102,13 @@ namespace disasterApi.Core.Services
             await _repository.SaveAsync();
         }
 
-        private string GenerateAlertMessage(string disasterType)
+        private static string GenerateAlertMessage(string disasterType)
         {
             return disasterType.ToLower() switch
             {
-                "flood" => $"⚠️ [FLOOD WARNING] Severe flooding risk detected in . Please evacuate if necessary and stay tuned to local news.",
-                "earthquake" => $"⚠️ [EARTHQUAKE ALERT] Possible seismic activity near . Stay away from buildings and take safety measures.",
-                "storm" => $"⚠️ [STORM WARNING] Strong storm approaching . Secure loose items and remain indoors.",
-                "wildfire" => $"🔥 [WILDFIRE ALERT] Wildfire threat detected in . Prepare for possible evacuation.",
-                "tsunami" => $"🌊 [TSUNAMI ALERT] Potential tsunami risk in coastal areas near . Evacuate to higher ground immediately.",
+                "flood" => $"[FLOOD WARNING] Severe flooding risk detected in . Please evacuate if necessary and stay tuned to local news.",
+                "earthquake" => $" [EARTHQUAKE ALERT] Possible seismic activity near . Stay away from buildings and take safety measures.",
+                "wildfire" => $" [WILDFIRE ALERT] Wildfire threat detected in . Prepare for possible evacuation.",
                 _ => $"⚠️ [DISASTER ALERT] A high-risk event ({disasterType}) has been detected in . Stay alert and follow safety instructions."
             };
         }

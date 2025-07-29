@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace disasterApi.Domain.Entities
 {
@@ -21,12 +15,6 @@ namespace disasterApi.Domain.Entities
         [Required]
         public string AlertMessage { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }
-        [Required]
-        public DateTime CreatedAt { get; set; }
-        [Required]
-        public DateTime UpdatedAt { get; set; }
-        [Required]
-        public bool IsDeleted { get; set; }
 
         public Region? Region { get; set; }
     }

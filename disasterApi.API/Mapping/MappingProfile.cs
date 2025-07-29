@@ -12,7 +12,7 @@ namespace disasterApi.API.Mapping
             CreateMap<Region, RegionDto>()
                 .ForMember(dest => dest.RegionId, opt => opt.MapFrom(src => src.Id))
                 .ForPath(dest => dest.LocationCoordinates.Latitude, opt => opt.MapFrom(src => src.Latitude))
-                .ForPath(dest => dest.LocationCoordinates.Longitude, opt => opt.MapFrom(src => src.Longitude));
+                .ForPath(dest => dest.LocationCoordinates.Longtitude, opt => opt.MapFrom(src => src.Longtitude));
 
             CreateMap<RegionForCreationDto, Region>().ReverseMap();
 
