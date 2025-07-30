@@ -23,7 +23,7 @@ namespace disasterApi.Core.Services
 
         public async Task<RegionDto> CreateNewRegionAsync(RegionForCreationDto input)
         {
-            var checkRegion = await _repository.RegionRepository.GetRegionByLatitudeAndLongtitude(input.Latitude, input.Longitude, false);
+            var checkRegion = await _repository.RegionRepository.GetRegionByLatitudeAndLongtitude(input.Latitude, input.Longtitude, false);
             if (checkRegion != null)
             {
                 throw new BadRequestException("Region already exists with the same latitude and longitude.");

@@ -10,7 +10,7 @@ namespace disasterApi.Core.Dtos
 
         [Required(ErrorMessage = "Longitude is required.")]
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
-        public double Longitude { get; init; }
+        public double Longtitude { get; init; }
 
         [Required(ErrorMessage = "At least one disaster type is required.")]
         [MinLength(1, ErrorMessage = "At least one disaster type must be specified.")]
