@@ -27,17 +27,9 @@ namespace disasterApi.Core.Services
         }
         public async Task<IEnumerable<AlertDto>> GetAlertsAsync()
         {
-            var alertCache = await _cache.GetStringAsync("AlertData");
-            if(alertCache != null)
-            {
-                var cache = _mapper.Map<IEnumerable<AlertDto>>(JsonSerializer.Deserialize<IEnumerable<AlertDto>>(alertCache));
-                if(cache != null)
-                    return cache;
-            }
-
+ 
             var alerts = await _repository.AlertRepository.GetAllAlert();
 
-            await _cache.SetStringAsync("AlertData", JsonSerializer.Serialize(alerts));
             return _mapper.Map<IEnumerable<AlertDto>>(alerts);
         }
 
